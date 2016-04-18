@@ -1,0 +1,32 @@
+{
+    "name": "meling/filter",
+    "description": "Filter",
+    "keywords": [
+        "phpixie",
+        "filter"
+    ],
+    "homepage": "http://meling.ru",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vadim Meling",
+            "email": "support@meling.ru"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4.0",
+        "phpixie/default-bundle": "~3.0",
+        "phpixie/bundle-framework": "~3.0"
+    },
+    "require-dev": {
+        "phpixie/test": "~3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Meling\\": "src/Meling",
+            "Meling\\Tests\\": "tests/Meling/Tests"
+        }
+    }
+}
