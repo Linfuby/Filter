@@ -14,22 +14,22 @@ class Filter
     protected $builder;
 
     /**
-     * @param \PHPixie\Database\Connection           $db
+     * @param \PHPixie\Database\Connection           $connection
      * @param \PHPixie\Slice\Type\ArrayData\Editable $data
      */
-    public function __construct($db, $data)
+    public function __construct($connection, $data)
     {
-        $this->builder = $this->buildBuilder($db, $data);
+        $this->builder = $this->buildBuilder($connection, $data);
     }
 
     /**
-     * @param \PHPixie\Database\Connection           $db
+     * @param \PHPixie\Database\Connection           $connection
      * @param \PHPixie\Slice\Type\ArrayData\Editable $data
      * @return Filter\Builder
      */
-    protected function buildBuilder($db, $data)
+    protected function buildBuilder($connection, $data)
     {
-        return new Filter\Builder($db, $data);
+        return new Filter\Builder($connection, $data);
     }
 
 }

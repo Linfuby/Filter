@@ -1,10 +1,6 @@
 <?php
 namespace Meling\Tests\Filter\Lists;
 
-/**
- * Class SexesTest
- * @package Meling\Tests\Filter\Lists
- */
 class SexesTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -14,53 +10,57 @@ class SexesTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        /** @var \Meling\Filter\Builder $builder */
+        $builder     = $this->getMock('\Meling\Filter\Builder', array(), array(), '', false);
         $slice       = new \PHPixie\Slice();
-        $database    = new \PHPixie\Database(
-            $slice->arrayData(
-                array(
-                    'default' => array(
-                        'driver'     => 'pdo',
-                        'connection' => 'mysql:host=localhost;dbname=parishop_pixie',
-                        'user'       => 'parishop',
-                        'password'   => 'xd7pL2yvcL9yXUZ8fE7C',
-                        'database'   => 'parishop_pixie',
-                    ),
-                )
+        $data        = $slice->editableArrayData(
+            array(
+                'sexes' => 3002,
             )
         );
-        $data        = $slice->editableArrayData(
-            array('sexes' => 3001)
-        );
-        $sexId       = null;
-        $this->sexes = new \Meling\Filter\Lists\Sexes($sexId);
+        $this->sexes = new \Meling\Filter\Lists\Sexes($builder, $data->arraySlice('sexes'));
     }
 
-    public function testAttributeItems()
+    public function testAttributeBuilder()
     {
-        $this->assertAttributeEquals(null, 'items', $this->sexes);
+        $this->assertAttributeInstanceOf('\Meling\Filter\Builder', 'builder', $this->sexes);
     }
 
-    public function testAttributeSexId()
+    public function testAttributeData()
     {
-        $this->assertAttributeEquals(null, 'sexId', $this->sexes);
+        $this->assertAttributeInstanceOf('\PHPixie\Slice\Type\ArrayData\Slice', 'data', $this->sexes);
+    }
+
+    public function testMethodActive()
+    {
+        $this->assertTrue($this->sexes->active());
+    }
+
+    public function testMethodActiveFalse()
+    {
+        /** @var \Meling\Filter\Builder $builder */
+        $builder     = $this->getMock('\Meling\Filter\Builder', array(), array(), '', false);
+        $slice       = new \PHPixie\Slice();
+        $data        = $slice->editableArrayData();
+        $this->sexes = new \Meling\Filter\Lists\Sexes($builder, $data->arraySlice('sexes'));
+        $this->assertFalse($this->sexes->active());
     }
 
     public function testMethodAsArray()
     {
-        $this->assertInternalType('array', $this->sexes->asArray());
+        foreach($this->sexes->asArray() as $sex) {
+            $this->assertInstanceOf('\Meling\Filter\Lists\Items\Item', $sex);
+        }
+    }
+
+    public function testMethodGet()
+    {
+        $this->assertInstanceOf('\Meling\Filter\Lists\Items\Item', $this->sexes->get('3001'));
     }
 
     public function testMethodId()
     {
-        $this->sexes->get(3001);
-        $this->assertEquals(
-            (object)array(
-                'id'      => 0,
-                'name'    => 'Весь ассортимент',
-                'checked' => 1,
-            ), $this->sexes->get(null)
-        );
+        $this->assertEquals(3002, $this->sexes->id());
     }
-
 
 }

@@ -2,98 +2,32 @@
 namespace Meling\Filter\Lists;
 
 /**
- * Список Типов изделий
  * Class Types
+ * @method Items\Type[] asArray();
+ * @method Items\Type get($id);
  * @package Meling\Filter\Lists
  */
-class Types
+class Types extends \Meling\Filter\Lists\ImplementationSelected implements ListSelected
 {
     /**
-     * @var \PHPixie\Database\Connection
+     * @return Items\Item[]
      */
-    protected $db;
-
-    /**
-     * Выбранные пункты фильтрации
-     * @var array
-     */
-    protected $ids;
-
-    /**
-     * Выбранные пункты фильтрации (Категории)
-     * @var array
-     */
-    protected $categoryIds;
-
-    /**
-     * @var object[]
-     */
-    protected $items;
-
-    /**
-     * Types constructor.
-     * @param \PHPixie\Database\Connection $db
-     * @param array                        $ids
-     * @param array                        $categoryIds
-     */
-    public function __construct(\PHPixie\Database\Connection $db, array $ids, array $categoryIds)
+    protected function generateItems()
     {
-        $this->db          = $db;
-        $this->ids         = $ids;
-        $this->categoryIds = $categoryIds;
-    }
-
-
-    /**
-     * @return \object[]
-     */
-    public function asArray()
-    {
-        $this->requireItems();
-
-        return $this->items;
-    }
-
-    /**
-     * @param $id
-     * @return object
-     */
-    public function get($id)
-    {
-        $this->requireItems();
-        if(array_key_exists($id, $this->items)) {
-            return $this->items[$id];
-        }
-
-        return $this->items[0];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function id()
-    {
-        return $this->ids;
-    }
-
-    private function requireItems()
-    {
-        if($this->items !== null) {
-            return;
+        $query = $this->builder->connection()->selectQuery();
+        $query->table('productTypes');
+        $query->orderAscendingBy('name');
+        if($this->builder->categories()->active()) {
+            $query->where('categoryId', 'in', $this->builder->categories()->id());
         }
         $items = array();
-        $query = $this->db->selectQuery();
-        $query->fields()
-        $query->table('productTypes', 'pt');
         foreach($query->execute() as $item) {
-            if(in_array($item->id, $this->id())) {
-                $item->checked = 1;
-            } else {
-                $item->checked = 0;
-            }
-            $items[$item->id] = $item;
+            $category         = $this->builder->categories()->get($item->categoryId);
+            $items[(string)$item->id] = new Items\Type((string)$item->id, $item->name, in_array((string)$item->id, $this->ids()), $category);
         }
-        $this->items = $items;
+
+        return $items;
     }
+
 
 }
