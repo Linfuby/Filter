@@ -37,7 +37,7 @@ class TypesTest extends \PHPUnit_Framework_TestCase
                     2,
                     10,
                 ),
-                'types'      => array(952749142001),
+                'types'      => array('952749142001'),
             )
         );
         $builder        = new \Meling\Filter\Builder($connection, $data);
@@ -89,7 +89,7 @@ class TypesTest extends \PHPUnit_Framework_TestCase
 
     public function testMethodId()
     {
-        $this->assertEquals(array(952749142001), $this->types->ids());
+        $this->assertEquals(array(952749142001), $this->types->id());
     }
 
 }

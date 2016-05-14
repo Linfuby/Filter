@@ -87,7 +87,7 @@ class CategoriesTest extends \PHPUnit_Framework_TestCase
 
     public function testMethodId()
     {
-        $this->assertEquals(array(2, 10), $this->categories->ids());
+        $this->assertEquals(array(2, 10), $this->categories->id());
     }
 
 }

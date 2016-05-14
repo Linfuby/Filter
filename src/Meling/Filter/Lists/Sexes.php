@@ -1,7 +1,7 @@
 <?php
 namespace Meling\Filter\Lists;
 
-class Sexes extends \Meling\Filter\Lists\ImplementationChecked implements ListChecked
+class Sexes extends Implementation implements Lists
 {
     /**
      * @return bool

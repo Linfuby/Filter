@@ -7,7 +7,7 @@ namespace Meling\Filter\Lists;
  * @method Items\Type get($id);
  * @package Meling\Filter\Lists
  */
-class Types extends \Meling\Filter\Lists\ImplementationSelected implements ListSelected
+class Types extends Implementation implements Lists
 {
     /**
      * @return Items\Item[]
@@ -17,13 +17,14 @@ class Types extends \Meling\Filter\Lists\ImplementationSelected implements ListS
         $query = $this->builder->connection()->selectQuery();
         $query->table('productTypes');
         $query->orderAscendingBy('name');
-        if($this->builder->categories()->active()) {
+        if ($this->builder->categories()->active()) {
             $query->where('categoryId', 'in', $this->builder->categories()->id());
         }
         $items = array();
-        foreach($query->execute() as $item) {
-            $category         = $this->builder->categories()->get($item->categoryId);
-            $items[(string)$item->id] = new Items\Type((string)$item->id, $item->name, in_array((string)$item->id, $this->ids()), $category);
+        foreach ($query->execute() as $item) {
+            $category                 = $this->builder->categories()->get($item->categoryId);
+            $items[(string)$item->id] = new Items\Type((string)$item->id, $item->name,
+                in_array((string)$item->id, $this->id()), $category);
         }
 
         return $items;

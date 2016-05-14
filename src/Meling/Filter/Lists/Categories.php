@@ -1,7 +1,7 @@
 <?php
 namespace Meling\Filter\Lists;
 
-class Categories extends \Meling\Filter\Lists\ImplementationSelected implements ListSelected
+class Categories extends Implementation implements Lists
 {
     /**
      * @return Items\Item[]
@@ -17,7 +17,8 @@ class Categories extends \Meling\Filter\Lists\ImplementationSelected implements 
         }
         $items = array();
         foreach($query->execute() as $item) {
-            $items[(string)$item->id] = $this->buildItem((string)$item->id, $item->name, in_array((string)$item->id, $this->ids()));
+            $items[(string)$item->id] = $this->buildItem((string)$item->id, $item->name,
+                in_array((string)$item->id, $this->id()));
         }
 
         return $items;

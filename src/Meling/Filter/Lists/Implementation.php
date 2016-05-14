@@ -1,7 +1,7 @@
 <?php
 namespace Meling\Filter\Lists;
 
-abstract class ImplementationChecked
+abstract class Implementation
 {
     /**
      * @var \Meling\Filter\Builder
@@ -20,6 +20,7 @@ abstract class ImplementationChecked
 
     /**
      * Builder constructor.
+     *
      * @param \Meling\Filter\Builder              $builder
      * @param \PHPixie\Slice\Type\ArrayData\Slice $data
      */
@@ -49,13 +50,14 @@ abstract class ImplementationChecked
 
     /**
      * @param $id
+     *
      * @return Items\Item
      * @throws \Exception
      */
     public function get($id)
     {
         $this->requireItems();
-        if(array_key_exists($id, $this->items)) {
+        if (array_key_exists($id, $this->items)) {
             return $this->items[$id];
         }
         throw new \Exception('Item ' . $id . ' does not exist');
@@ -74,17 +76,17 @@ abstract class ImplementationChecked
         return new Items\Item($id, $name, $selected);
     }
 
-    protected function requireItems()
-    {
-        if($this->items !== null) {
-            return;
-        }
-        $this->items = $this->generateItems();
-    }
-
     /**
      * @return Items\Item[]
      */
     protected abstract function generateItems();
+
+    protected function requireItems()
+    {
+        if ($this->items !== null) {
+            return;
+        }
+        $this->items = $this->generateItems();
+    }
 
 }

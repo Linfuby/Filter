@@ -25,6 +25,7 @@ class Builder
 
     /**
      * Builder constructor.
+     *
      * @param \PHPixie\Database\Connection           $connection
      * @param \PHPixie\Slice\Type\ArrayData\Editable $data
      */
@@ -52,16 +53,16 @@ class Builder
 
     public function firstQuery()
     {
-        if($this->query === null) {
+        if ($this->query === null) {
             $this->query = $this->connection()->selectQuery();
-            if($this->sexes()->active()) {
+            if ($this->sexes()->active()) {
                 $this->query->where('products.sexId', $this->sexes()->id());
             }
-            if($this->categories()->active()) {
-                $this->query->where('productTypes.categoryId', 'in', $this->categories()->ids());
+            if ($this->categories()->active()) {
+                $this->query->where('productTypes.categoryId', 'in', $this->categories()->id());
             }
-            if($this->types()->active()) {
-                $this->query->where('products.productTypeId', 'in', $this->types()->ids());
+            if ($this->types()->active()) {
+                $this->query->where('products.productTypeId', 'in', $this->types()->id());
             }
         }
 
@@ -78,11 +79,10 @@ class Builder
 
     public function secondQuery($except = null)
     {
-        $query = $this->firstQuery();
-        if($this->groups()->active()) {
-            foreach($this->groups()->asArray() as $group) {
-                if($group->name() !== $except) {
-                    $group->updateQuery($query);
+        if ($this->groups()->active()) {
+            foreach ($this->groups()->asArray() as $group) {
+                if ($group->name() !== $except) {
+                    $group->updateQuery();
                 }
             }
         }
@@ -111,7 +111,8 @@ class Builder
 
     protected function buildGroups()
     {
-        return new Groups($this, $this->types()->get($this->data->getRequired('typeId')));
+        return new Groups($this, $this->types()->get($this->data->getRequired('typeId')),
+            $this->data->arraySlice('groups.' . $this->data->getRequired('typeId')));
     }
 
     protected function buildSexes()
@@ -126,7 +127,7 @@ class Builder
 
     protected function instance($name)
     {
-        if(!array_key_exists($name, $this->instances)) {
+        if (!array_key_exists($name, $this->instances)) {
             $method                 = 'build' . ucfirst($name);
             $this->instances[$name] = $this->$method();
         }

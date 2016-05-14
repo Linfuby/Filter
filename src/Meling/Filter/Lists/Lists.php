@@ -1,7 +1,7 @@
 <?php
 namespace Meling\Filter\Lists;
 
-interface ListSelected
+interface Lists
 {
     public function active();
 
@@ -9,6 +9,6 @@ interface ListSelected
 
     public function get($id);
 
-    public function ids();
+    public function id();
 
 }
