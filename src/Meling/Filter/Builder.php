@@ -19,28 +19,54 @@ class Builder
     protected $instances = array();
 
     /**
-     * @var \PHPixie\Database\Driver\PDO\Query\Type\Select
-     */
-    protected $query;
-
-    /**
      * Builder constructor.
-     *
      * @param \PHPixie\Database\Connection           $connection
      * @param \PHPixie\Slice\Type\ArrayData\Editable $data
      */
     public function __construct(\PHPixie\Database\Connection $connection, \PHPixie\Slice\Type\ArrayData\Editable $data)
     {
         $this->connection = $connection;
-        $this->data       = $data;
+        if($typeIds = $data->get('types')) {
+            foreach($data->keys('extra') as $typeId) {
+                if(!in_array($typeId, $typeIds)) {
+                    $data->remove('extra.' . $typeId);
+                }
+            }
+        }
+
+        $this->data = $data;
     }
 
     /**
-     * @return Lists\Categories
+     * @return Lists\Fields\Actions
+     */
+    public function actions()
+    {
+        return $this->instance('actions');
+    }
+
+    /**
+     * @return Lists\Fields\Brands
+     */
+    public function brands()
+    {
+        return $this->instance('brands');
+    }
+
+    /**
+     * @return Lists\Fields\Categories
      */
     public function categories()
     {
         return $this->instance('categories');
+    }
+
+    /**
+     * @return Lists\Fields\Cities
+     */
+    public function cities()
+    {
+        return $this->instance('cities');
     }
 
     /**
@@ -51,45 +77,40 @@ class Builder
         return $this->connection;
     }
 
-    public function firstQuery()
-    {
-        if ($this->query === null) {
-            $this->query = $this->connection()->selectQuery();
-            if ($this->sexes()->active()) {
-                $this->query->where('products.sexId', $this->sexes()->id());
-            }
-            if ($this->categories()->active()) {
-                $this->query->where('productTypes.categoryId', 'in', $this->categories()->id());
-            }
-            if ($this->types()->active()) {
-                $this->query->where('products.productTypeId', 'in', $this->types()->id());
-            }
-        }
-
-        return $this->query;
-    }
-
     /**
-     * @return Groups
+     * @return \PHPixie\Slice\Type\ArrayData\Editable
      */
-    public function groups()
+    public function data()
     {
-        return $this->instance('groups');
-    }
-
-    public function secondQuery($except = null)
-    {
-        if ($this->groups()->active()) {
-            foreach ($this->groups()->asArray() as $group) {
-                if ($group->name() !== $except) {
-                    $group->updateQuery();
-                }
-            }
-        }
+        return $this->data;
     }
 
     /**
-     * @return Lists\Sexes
+     * @return Lists\Fields\Prices
+     */
+    public function prices()
+    {
+        return $this->instance('prices');
+    }
+
+    /**
+     * @return Products
+     */
+    public function products()
+    {
+        return $this->instance('products');
+    }
+
+    /**
+     * @return Lists\Fields\Seasons
+     */
+    public function seasons()
+    {
+        return $this->instance('seasons');
+    }
+
+    /**
+     * @return Lists\Fields\Sexes
      */
     public function sexes()
     {
@@ -97,37 +118,74 @@ class Builder
     }
 
     /**
-     * @return Lists\Types
+     * @return Lists\Fields\Shops
+     */
+    public function shops()
+    {
+        return $this->instance('shops');
+    }
+
+    /**
+     * @return Lists\Fields\Types
      */
     public function types()
     {
         return $this->instance('types');
     }
 
-    protected function buildCategories()
+    protected function buildActions()
     {
-        return new Lists\Categories($this, $this->data->arraySlice('categories'));
+        return new Lists\Fields\Actions($this, 'actions', $this->data()->get('actions'));
     }
 
-    protected function buildGroups()
+    protected function buildBrands()
     {
-        return new Groups($this, $this->types()->get($this->data->getRequired('typeId')),
-            $this->data->arraySlice('groups.' . $this->data->getRequired('typeId')));
+        return new Lists\Fields\Brands($this, 'brands', $this->data()->get('brands', array()));
+    }
+
+    protected function buildCategories()
+    {
+        return new Lists\Fields\Categories($this, 'categories', $this->data()->get('categories', array()));
+    }
+
+    protected function buildCities()
+    {
+        return new Lists\Fields\Cities($this, 'cities', $this->data()->get('cities'));
+    }
+
+    protected function buildPrices()
+    {
+        return new Lists\Fields\Prices($this, 'prices', $this->data()->get('prices.from'), $this->data()->get('prices.to'), $this->data()->get('prices.id'));
+    }
+
+    protected function buildProducts()
+    {
+        return new Products($this);
+    }
+
+    protected function buildSeasons()
+    {
+        return new Lists\Fields\Seasons($this, 'seasons', $this->data()->get('seasons', array()));
     }
 
     protected function buildSexes()
     {
-        return new Lists\Sexes($this, $this->data->arraySlice('sexes'));
+        return new Lists\Fields\Sexes($this, 'sexes', $this->data()->get('sexes'));
+    }
+
+    protected function buildShops()
+    {
+        return new Lists\Fields\Shops($this, 'shops', $this->data()->get('shops'));
     }
 
     protected function buildTypes()
     {
-        return new Lists\Types($this, $this->data->arraySlice('types'));
+        return new Lists\Fields\Types($this, 'types', $this->data()->get('types', array()), $this->data()->arraySlice('extra'));
     }
 
     protected function instance($name)
     {
-        if (!array_key_exists($name, $this->instances)) {
+        if(!array_key_exists($name, $this->instances)) {
             $method                 = 'build' . ucfirst($name);
             $this->instances[$name] = $this->$method();
         }
