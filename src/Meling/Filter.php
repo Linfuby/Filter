@@ -2,122 +2,143 @@
 namespace Meling;
 
 /**
- * Компонент Фильтра
  * Class Filter
+ * Фильтр
+ * Список Половой принадлежности (Женское, Мужское, Весь Ассортимент)
+ * Список Локаций (Город, Магазин, Весь Ассортимент)
+ * Список Акций (Распродажа, Акция, Весь Ассортимент)
+ * Список Товаров (Идентификаторы товаров)
+ * Для каждого пола, необходимо получить список Категорий, Брендов, Сезонов, Цветов, Цены
+ * Для каждой категории необходимо получить список Типов изделий
+ * Для каждого типа изделия, необходимо получить Размеры, Чашки, Цвета, Цены, Атрибуты и их Значения
  * @package Meling
+ * @since   2.0
  */
 class Filter
 {
     /**
-     * @var Filter\Builder
+     * Соединение с БД
+     * @var \PHPixie\Database\Connection
+     * @since 2.0
      */
-    protected $builder;
+    protected $connection;
 
     /**
-     * @param \PHPixie\Database\Connection           $connection
-     * @param \PHPixie\Slice\Type\ArrayData\Editable $data
+     * Выбранные пункты в фильтре
+     * @var \PHPixie\Slice\Type\ArrayData\Editable
+     * @since 2.0
      */
-    public function __construct($connection, $data)
+    protected $data;
+
+    /**
+     * Список Акций
+     * @var Filter\Actions
+     * @since 2.0
+     */
+    private $actions;
+
+    /**
+     * Список Половой принадлежности
+     * @var Filter\Sexes
+     * @since 2.0
+     */
+    private $sexes;
+
+    /**
+     * Список Локаций
+     * @var Filter\Locations
+     * @since 2.0
+     */
+    private $locations;
+
+    /**
+     * Класс товаров
+     * @var Filter\Products
+     * @since 2.0
+     */
+    private $products;
+
+    /**
+     * Filter constructor.
+     * @param \PHPixie\Database\Connection           $connection Соединение с БД
+     * @param \PHPixie\Slice\Type\ArrayData\Editable $data       Выбранные пункты в фильтре
+     * @since 2.0
+     */
+    public function __construct(\PHPixie\Database\Connection $connection, \PHPixie\Slice\Type\ArrayData\Editable $data)
     {
-        $this->builder = $this->buildBuilder($connection, $data);
+        $this->connection = $connection;
+        $this->data       = $data;
     }
 
     /**
-     * @return Filter\Lists\Fields\Actions
+     * @return Filter\Actions
+     * @since 2.0
      */
     public function actions()
     {
-        return $this->builder->actions();
+        if($this->actions === null) {
+            $this->actions = new Filter\Actions($this, $this->data->get('actions', []));
+        }
+
+        return $this->actions;
     }
 
     /**
-     * @return Filter\Lists\Fields\Brands
+     * @return \PHPixie\Database\Connection
+     * @since 2.0
      */
-    public function brands()
+    public function connection()
     {
-        return $this->builder->brands();
+        return $this->connection;
     }
 
     /**
-     * @return Filter\Lists\Fields\Categories
+     * @return \PHPixie\Slice\Type\ArrayData\Editable
+     * @since 2.0
      */
-    public function categories()
+    public function data()
     {
-        return $this->builder->categories();
+        return $this->data;
     }
 
     /**
-     * @return Filter\Lists\Fields\Cities
+     * @return Filter\Locations
+     * @since 2.0
      */
-    public function cities()
+    public function locations()
     {
-        return $this->builder->cities();
-    }
+        if($this->locations === null) {
+            $this->locations = new Filter\Locations($this, $this->data->arraySlice('locations'));
+        }
 
-    /**
-     * @return Filter\Lists\Fields\Types
-     */
-    public function extraName()
-    {
-        return $this->builder->data()->get('extraName');
-    }
-
-    /**
-     * @return Filter\Lists\Fields\Prices
-     */
-    public function prices()
-    {
-        return $this->builder->prices();
+        return $this->locations;
     }
 
     /**
      * @return Filter\Products
+     * @since 2.0
      */
     public function products()
     {
-        return $this->builder->products();
+        if($this->products === null) {
+            $this->products = new Filter\Products($this);
+        }
+
+        return $this->products;
     }
 
     /**
-     * @return Filter\Lists\Fields\Seasons
-     */
-    public function seasons()
-    {
-        return $this->builder->seasons();
-    }
-
-    /**
-     * @return Filter\Lists\Fields\Sexes
+     * @return Filter\Sexes
+     * @since 2.0
      */
     public function sexes()
     {
-        return $this->builder->sexes();
-    }
+        if($this->sexes === null) {
+            $this->sexes = new Filter\Sexes($this, $this->data->arraySlice('sexes'));
+        }
 
-    /**
-     * @return Filter\Lists\Fields\Shops
-     */
-    public function shops()
-    {
-        return $this->builder->shops();
-    }
-
-    /**
-     * @return Filter\Lists\Fields\Types
-     */
-    public function types()
-    {
-        return $this->builder->types();
-    }
-
-    /**
-     * @param \PHPixie\Database\Connection           $connection
-     * @param \PHPixie\Slice\Type\ArrayData\Editable $data
-     * @return Filter\Builder
-     */
-    protected function buildBuilder($connection, $data)
-    {
-        return new Filter\Builder($connection, $data);
+        return $this->sexes;
     }
 
 }
+
